@@ -1,6 +1,5 @@
 import assert from "assert";
 
-import { CloudTasksClient } from "@google-cloud/tasks";
 import { SlackEvent } from "@slack/types";
 
 import {
@@ -13,7 +12,10 @@ import {
 } from "./settings";
 
 // Initialize Cloud Tasks client with explicit credentials for Vercel
-function createCloudTasksClient() {
+async function createCloudTasksClient() {
+  // Dynamically import CloudTasksClient to avoid module-level initialization
+  const { CloudTasksClient } = await import("@google-cloud/tasks");
+
   if (GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     try {
       const credentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON);
@@ -31,10 +33,10 @@ function createCloudTasksClient() {
 }
 
 // Lazy initialization - create client only when needed
-let cloudTasksClient: CloudTasksClient | null = null;
-function getCloudTasksClient() {
+let cloudTasksClient: any = null;
+async function getCloudTasksClient() {
   if (!cloudTasksClient) {
-    cloudTasksClient = createCloudTasksClient();
+    cloudTasksClient = await createCloudTasksClient();
   }
   return cloudTasksClient;
 }
@@ -48,7 +50,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
   assert(GOOGLE_TASKS_LOCATION, "GOOGLE_TASKS_LOCATION environment variable is required");
   assert(GOOGLE_TASKS_QUEUE, "GOOGLE_TASKS_QUEUE environment variable is required");
 
-  const client = getCloudTasksClient();
+  const client = await getCloudTasksClient();
   const queuePath = client.queuePath(GOOGLE_PROJECT_ID, GOOGLE_TASKS_LOCATION, GOOGLE_TASKS_QUEUE);
 
   const url = `${BASE_URL}/api/slack/tasks`;
