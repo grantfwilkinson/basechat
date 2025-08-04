@@ -89,16 +89,27 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
 
   assert(tenant.slackBotToken, "expected slack bot token");
 
+  console.log(`Tenant response mode: ${tenant.slackResponseMode}, Event type: ${event.type}`);
   if (tenant.slackResponseMode === "mentions" && event.type !== "app_mention") {
     console.log(`Skipping message - mentions only mode`);
     return;
   }
 
   const userMessage = event.text;
-  const shouldReply = await shouldReplyToMessage(userMessage);
-  if (!shouldReply) {
-    console.log(`Skipping message that did not meet the criteria for a reply`);
-    return;
+  console.log(`Processing message: "${userMessage}"`);
+
+  // For debugging - temporarily bypass question detection
+  const DEBUG_BYPASS_CHECKS = true;
+
+  if (!DEBUG_BYPASS_CHECKS) {
+    const shouldReply = await shouldReplyToMessage(userMessage);
+    if (!shouldReply) {
+      console.log(`Skipping message that did not meet the criteria for a reply - not detected as a question`);
+      return;
+    }
+    console.log(`Message passed question detection, proceeding with response generation`);
+  } else {
+    console.log(`DEBUG: Bypassing question detection, proceeding with response generation`);
   }
 
   const slack = new WebClient(tenant.slackBotToken);
@@ -122,17 +133,36 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
       generatorFactory(tenant.defaultModel ?? DEFAULT_MODEL),
     );
     const object = await generator.generateObject(replyContext);
+    console.log(`Generated response: "${object.message}"`);
+    console.log(`Used source indexes: [${object.usedSourceIndexes.join(", ")}]`);
+    console.log(`Available sources count: ${replyContext.sources.length}`);
 
-    if (object.usedSourceIndexes.length > 0) {
+    if (DEBUG_BYPASS_CHECKS) {
+      // DEBUG: Send response regardless of sources or quality
+      const text =
+        object.usedSourceIndexes.length > 0 ? formatMessageWithSources(object, replyContext) : object.message;
+      console.log(`DEBUG: Sending response to Slack regardless of checks: "${text}"`);
+
+      await slack.chat.postMessage({
+        channel: event.channel,
+        thread_ts: event.ts,
+        text,
+      });
+      console.log(`DEBUG: Successfully sent message to Slack`);
+    } else if (object.usedSourceIndexes.length > 0) {
+      console.log(`Response uses sources, checking if answer is insightful...`);
       const answered = await isAnswered(userMessage ?? "", object.message);
+      console.log(`Is answer insightful: ${answered}`);
       if (answered) {
         const text = formatMessageWithSources(object, replyContext);
+        console.log(`Sending response to Slack: "${text}"`);
 
         await slack.chat.postMessage({
           channel: event.channel,
           thread_ts: event.ts,
           text,
         });
+        console.log(`Successfully sent message to Slack`);
       } else {
         console.log(`Reply was not an adequate response because it did not give an insightful answer, skipping`);
       }
@@ -141,6 +171,7 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
     }
   } catch (error) {
     console.error("Error processing message:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace available");
     // Don't rethrow - we want to remove the thinking face even if processing fails
   } finally {
     await slack.reactions.remove({
