@@ -30,7 +30,14 @@ function createCloudTasksClient() {
   return new CloudTasksClient();
 }
 
-const cloudTasksClient = createCloudTasksClient();
+// Lazy initialization - create client only when needed
+let cloudTasksClient: CloudTasksClient | null = null;
+function getCloudTasksClient() {
+  if (!cloudTasksClient) {
+    cloudTasksClient = createCloudTasksClient();
+  }
+  return cloudTasksClient;
+}
 
 interface SlackEventTask {
   event: SlackEvent;
@@ -41,7 +48,8 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
   assert(GOOGLE_TASKS_LOCATION, "GOOGLE_TASKS_LOCATION environment variable is required");
   assert(GOOGLE_TASKS_QUEUE, "GOOGLE_TASKS_QUEUE environment variable is required");
 
-  const queuePath = cloudTasksClient.queuePath(GOOGLE_PROJECT_ID, GOOGLE_TASKS_LOCATION, GOOGLE_TASKS_QUEUE);
+  const client = getCloudTasksClient();
+  const queuePath = client.queuePath(GOOGLE_PROJECT_ID, GOOGLE_TASKS_LOCATION, GOOGLE_TASKS_QUEUE);
 
   const url = `${BASE_URL}/api/slack/tasks`;
   const payload = JSON.stringify(taskData);
@@ -54,7 +62,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
 
   assert(GOOGLE_TASKS_SERVICE_ACCOUNT, "GOOGLE_TASKS_SERVICE_ACCOUNT environment variable is required");
 
-  const [response] = await cloudTasksClient.createTask({
+  const [response] = await client.createTask({
     parent: queuePath,
     task: {
       httpRequest: {
