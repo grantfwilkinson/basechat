@@ -71,13 +71,7 @@ export async function POST(request: NextRequest) {
         } else {
           setTimeout(async () => {
             console.warn("Processing Slack event handler inside setTimeout. This is not recommended for production.");
-            try {
-              await handleSlackEvent(slackEvent.event);
-              console.log("handleSlackEvent completed successfully in setTimeout");
-            } catch (error) {
-              console.error("Error in handleSlackEvent (setTimeout):", error);
-              console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-            }
+            await handleSlackEvent(slackEvent.event);
           }, 0);
         }
       } else {

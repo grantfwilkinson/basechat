@@ -28,21 +28,36 @@ export interface SlackSignInOptions {
 }
 
 export async function slackSignIn(teamId: string, slackUserId: string, options: SlackSignInOptions = {}) {
+  console.log(`slackSignIn: Looking for tenant with Slack team ID: ${teamId}`);
   const tenant = await getTenantBySlackTeamId(teamId);
+  console.log(`slackSignIn: Found tenant: ${tenant.id}`);
 
+  console.log(`slackSignIn: Looking for user with Slack user ID: ${slackUserId}`);
   let user = await findUserBySlackUserId(slackUserId);
   if (!user) {
+    console.log(`slackSignIn: User not found, creating new user`);
     const factory = options.slackClientFactory ?? createSlackClient;
     const client = factory(tenant);
+    console.log(`slackSignIn: Getting user info from Slack API`);
     const userInfo = await client.users.info({ user: slackUserId });
     assert(userInfo.user, "User info is required");
+    console.log(`slackSignIn: Creating new Slack user: ${userInfo.user.name}`);
     user = await createSlackUser(slackUserId, userInfo.user);
+    console.log(`slackSignIn: Created user with ID: ${user.id}`);
+  } else {
+    console.log(`slackSignIn: Found existing user: ${user.id}`);
   }
 
+  console.log(`slackSignIn: Looking for profile with tenant ID: ${tenant.id}, user ID: ${user.id}`);
   let profile = await findProfileByTenantIdAndUserId(tenant.id, user.id);
   if (!profile) {
+    console.log(`slackSignIn: Profile not found, creating new profile`);
     profile = await createProfile(tenant.id, user.id, "guest");
+    console.log(`slackSignIn: Created profile with ID: ${profile.id}`);
+  } else {
+    console.log(`slackSignIn: Found existing profile: ${profile.id}`);
   }
+  console.log(`slackSignIn: Returning tenant: ${tenant.id}, profile: ${profile.id}`);
   return { tenant, profile };
 }
 
