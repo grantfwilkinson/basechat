@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { saveConnection } from "@/lib/server/service";
+import { saveConnection, invalidateAuthContextCache } from "@/lib/server/service";
 import { DEFAULT_PARTITION_LIMIT, RAGIE_WEBHOOK_SECRET } from "@/lib/server/settings";
 import { validateSignature } from "@/lib/server/utils";
 
@@ -54,6 +54,13 @@ async function handlePartitionLimitEvent(event: WebhookEvent) {
         .update(schema.tenants)
         .set({ partitionLimitExceededAt: new Date() })
         .where(eq(schema.tenants.id, event.payload.partition));
+
+      // Invalidate auth context cache so the UI reflects the updated partition limit status
+      try {
+        await invalidateAuthContextCache(""); // Empty string since we're using revalidateTag internally
+      } catch (cacheError) {
+        console.warn("Failed to invalidate auth context cache after partition limit update:", cacheError);
+      }
     } catch (error) {
       console.error("Failed to update tenant:", error);
       return Response.json({ error: "Failed to update tenant settings" }, { status: 500 });

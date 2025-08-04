@@ -787,6 +787,13 @@ export async function linkUsers(fromUserId: string, toUserId: string) {
 
 export async function updateTenantPaidStatus(tenantId: string, paidStatus: "trial" | "active" | "expired") {
   await db.update(schema.tenants).set({ paidStatus }).where(eq(schema.tenants.id, tenantId));
+
+  // Invalidate auth context cache so the UI reflects the updated billing status
+  try {
+    await invalidateAuthContextCache(""); // Empty string since we're using revalidateTag internally
+  } catch (error) {
+    console.warn("Failed to invalidate auth context cache after paid status update:", error);
+  }
 }
 
 export async function createSlackUser(slackUserId: string, slackUser: SlackUser) {

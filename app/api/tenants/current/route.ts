@@ -5,6 +5,7 @@ import { updateTenantSchema } from "@/lib/api";
 import { modelArraySchema } from "@/lib/llm/types";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
+import { invalidateAuthContextCache } from "@/lib/server/service";
 import { requireAdminContextFromRequest } from "@/lib/server/utils";
 
 export async function PATCH(request: NextRequest) {
@@ -23,6 +24,14 @@ export async function PATCH(request: NextRequest) {
 
   try {
     await db.update(schema.tenants).set(update).where(eq(schema.tenants.id, tenant.id));
+
+    // Invalidate auth context cache so the UI reflects the updated tenant settings
+    try {
+      await invalidateAuthContextCache(""); // Empty string since we're using revalidateTag internally
+    } catch (cacheError) {
+      console.warn("Failed to invalidate auth context cache after tenant update:", cacheError);
+      // Don't fail the request if cache invalidation fails
+    }
   } catch (error) {
     console.error("Failed to update tenant:", error);
     return Response.json({ error: "Failed to update tenant settings" }, { status: 500 });

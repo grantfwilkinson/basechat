@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { getSlackSettingsPath } from "@/lib/paths";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
+import { invalidateAuthContextCache } from "@/lib/server/service";
 import { SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, BASE_URL } from "@/lib/server/settings";
 
 export async function GET(request: NextRequest) {
@@ -55,6 +56,15 @@ export async function GET(request: NextRequest) {
         slackTeamName: tokenData.team?.name,
       })
       .where(eq(schema.tenants.slug, state));
+
+    // Invalidate auth context cache so the UI reflects the updated connection status
+    // Note: We invalidate for all users since we can't easily get the current user ID in this context
+    // The invalidateAuthContextCache function uses revalidateTag which affects all cached entries
+    try {
+      await invalidateAuthContextCache(""); // Empty string since we're using revalidateTag internally
+    } catch (error) {
+      console.warn("Failed to invalidate auth context cache after Slack OAuth:", error);
+    }
 
     // Redirect back to Slack settings with success
     return Response.redirect(`${BASE_URL}${getSlackSettingsPath(state)}?success=true`);
