@@ -25,13 +25,24 @@ import { formatMessageWithSources, isAnswered, shouldReplyToMessage, slackSignIn
 
 // Handle different types of Slack events
 export async function handleSlackEvent(event: SlackEvent | undefined): Promise<void> {
-  if (!event) return;
+  if (!event) {
+    console.log("No event provided to handleSlackEvent");
+    return;
+  }
 
   console.log(`Processing Slack event in task handler: ${event.type}`);
 
   switch (event.type) {
     case "message":
-      await handleMessage(event as AllMessageEvents);
+      console.log(`Calling handleMessage for message event`);
+      try {
+        await handleMessage(event as AllMessageEvents);
+        console.log(`handleMessage completed successfully`);
+      } catch (error) {
+        console.error(`Error in handleMessage:`, error);
+        console.error(`Error stack:`, error instanceof Error ? error.stack : "No stack trace");
+        throw error; // Re-throw to maintain existing error behavior
+      }
       break;
 
     case "app_mention":
@@ -60,10 +71,15 @@ export async function handleSlackEvent(event: SlackEvent | undefined): Promise<v
 }
 
 async function handleMessage(event: AllMessageEvents): Promise<void> {
+  console.log(`handleMessage called with event type: ${event.type}`);
+  console.log(`Event subtype: ${event.subtype || "none"}`);
+  console.log(`Event text: "${(event as any).text || "no text"}"`);
+
   if (event.subtype && event.subtype !== undefined) {
     console.log(`Skipping message with subtype: ${event.subtype}`);
     return;
   }
+  console.log(`No subtype, calling _handleMessage...`);
   return _handleMessage(event);
 }
 
@@ -72,22 +88,35 @@ async function handleAppMention(event: AppMentionEvent): Promise<void> {
 }
 
 async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
+  console.log(`_handleMessage called with event:`, JSON.stringify(event, null, 2));
+
   if (!event.team) {
+    console.error("No team ID found in event");
     throw new Error("No team ID found in app mention event");
   }
+  console.log(`Team ID: ${event.team}`);
 
   if (!event.user) {
+    console.error("No user ID found in event");
     throw new Error("No user ID found in app mention event");
   }
+  console.log(`User ID: ${event.user}`);
 
   if (event.bot_id) {
     console.log(`Skipping message from bot: ${event.bot_id}`);
     return;
   }
+  console.log(`Not a bot message, proceeding...`);
 
+  console.log(`Calling slackSignIn with team: ${event.team}, user: ${event.user}`);
   const { tenant, profile } = await slackSignIn(event.team, event.user);
+  console.log(`slackSignIn completed, tenant ID: ${tenant.id}, profile ID: ${profile.id}`);
 
-  assert(tenant.slackBotToken, "expected slack bot token");
+  if (!tenant.slackBotToken) {
+    console.error("No slack bot token found for tenant");
+    throw new Error("expected slack bot token");
+  }
+  console.log(`Tenant has slack bot token`);
 
   console.log(`Tenant response mode: ${tenant.slackResponseMode}, Event type: ${event.type}`);
   if (tenant.slackResponseMode === "mentions" && event.type !== "app_mention") {
