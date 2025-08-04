@@ -9,10 +9,28 @@ import {
   GOOGLE_PROJECT_ID,
   GOOGLE_TASKS_LOCATION,
   GOOGLE_TASKS_QUEUE,
+  GOOGLE_APPLICATION_CREDENTIALS_JSON,
 } from "./settings";
 
-// Initialize Cloud Tasks client
-const cloudTasksClient = new CloudTasksClient();
+// Initialize Cloud Tasks client with explicit credentials for Vercel
+function createCloudTasksClient() {
+  if (GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    try {
+      const credentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON);
+      return new CloudTasksClient({
+        credentials,
+        projectId: GOOGLE_PROJECT_ID,
+      });
+    } catch (error) {
+      console.error("Error parsing Google credentials JSON:", error);
+      throw new Error("Invalid Google credentials JSON");
+    }
+  }
+  // Fallback to default credentials (for local development)
+  return new CloudTasksClient();
+}
+
+const cloudTasksClient = createCloudTasksClient();
 
 interface SlackEventTask {
   event: SlackEvent;
