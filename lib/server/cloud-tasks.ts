@@ -8,7 +8,7 @@ import {
   GOOGLE_PROJECT_ID,
   GOOGLE_TASKS_LOCATION,
   GOOGLE_TASKS_QUEUE,
-  GOOGLE_APPLICATION_CREDENTIALS_JSON,
+  GOOGLE_APPLICATION_CREDENTIALS,
 } from "./settings";
 
 // Initialize Cloud Tasks client with explicit credentials for Vercel
@@ -16,9 +16,9 @@ async function createCloudTasksClient() {
   // Dynamically import CloudTasksClient to avoid module-level initialization
   const { CloudTasksClient } = await import("@google-cloud/tasks");
 
-  if (GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  if (GOOGLE_APPLICATION_CREDENTIALS) {
     try {
-      const credentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON);
+      const credentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
       return new CloudTasksClient({
         credentials,
         projectId: GOOGLE_PROJECT_ID,
