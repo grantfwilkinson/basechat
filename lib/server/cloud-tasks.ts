@@ -1,6 +1,5 @@
 import assert from "assert";
 
-import { CloudTasksClient } from "@google-cloud/tasks";
 import { SlackEvent } from "@slack/types";
 
 import {
@@ -11,18 +10,25 @@ import {
   GOOGLE_TASKS_QUEUE,
 } from "./settings";
 
-// Initialize Cloud Tasks client with explicit configuration
-// This helps with Vercel deployment where environment variables might need explicit handling
-const cloudTasksClient = new CloudTasksClient({
-  projectId: GOOGLE_PROJECT_ID,
-  // Use service account credentials from environment variable if available
-  credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
-    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-    : undefined,
-});
-
 interface SlackEventTask {
   event: SlackEvent;
+}
+
+// Lazy load the CloudTasksClient to avoid issues with missing config files during build
+let cloudTasksClient: any = null;
+
+async function getCloudTasksClient() {
+  if (!cloudTasksClient) {
+    const { CloudTasksClient } = await import("@google-cloud/tasks");
+    cloudTasksClient = new CloudTasksClient({
+      projectId: GOOGLE_PROJECT_ID,
+      // Use service account credentials from environment variable if available
+      credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+        ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+        : undefined,
+    });
+  }
+  return cloudTasksClient;
 }
 
 export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<void> {
@@ -30,7 +36,8 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
   assert(GOOGLE_TASKS_LOCATION, "GOOGLE_TASKS_LOCATION environment variable is required");
   assert(GOOGLE_TASKS_QUEUE, "GOOGLE_TASKS_QUEUE environment variable is required");
 
-  const queuePath = cloudTasksClient.queuePath(GOOGLE_PROJECT_ID, GOOGLE_TASKS_LOCATION, GOOGLE_TASKS_QUEUE);
+  const client = await getCloudTasksClient();
+  const queuePath = client.queuePath(GOOGLE_PROJECT_ID, GOOGLE_TASKS_LOCATION, GOOGLE_TASKS_QUEUE);
 
   const url = `${BASE_URL}/api/slack/tasks`;
   const payload = JSON.stringify(taskData);
@@ -43,7 +50,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
 
   assert(GOOGLE_TASKS_SERVICE_ACCOUNT, "GOOGLE_TASKS_SERVICE_ACCOUNT environment variable is required");
 
-  const [response] = await cloudTasksClient.createTask({
+  const [response] = await client.createTask({
     parent: queuePath,
     task: {
       httpRequest: {

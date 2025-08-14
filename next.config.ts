@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     authInterrupts: true,
+    serverComponentsExternalPackages: ["@google-cloud/tasks"],
   },
   eslint: {
     // Disable ESLint during builds to avoid native binding issues on Vercel
@@ -14,12 +15,9 @@ const nextConfig: NextConfig = {
   webpack: (config, { isServer }) => {
     // Fix for Google Cloud Tasks JSON configuration files on Vercel
     if (isServer) {
-      // Ensure Google Cloud Tasks config files are included in the build
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        // Force webpack to resolve the CJS version instead of ESM to avoid the JSON file issue
-        "@google-cloud/tasks": "@google-cloud/tasks/build/src/index.js",
-      };
+      // Don't bundle @google-cloud/tasks, let it be handled at runtime
+      config.externals = config.externals || [];
+      config.externals.push("@google-cloud/tasks");
     }
     return config;
   },
