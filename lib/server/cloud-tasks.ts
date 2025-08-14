@@ -55,6 +55,13 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
   const auth = await getGoogleAuth();
   const accessToken = await auth.getAccessToken();
 
+  // Get the service account email from credentials
+  const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+    : null;
+
+  const serviceAccountEmail = credentials?.client_email || GOOGLE_TASKS_SERVICE_ACCOUNT;
+
   // Create the task using REST API
   const taskPayload = {
     task: {
@@ -66,7 +73,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
         },
         body: Buffer.from(payload).toString("base64"),
         oidcToken: {
-          serviceAccountEmail: GOOGLE_TASKS_SERVICE_ACCOUNT,
+          serviceAccountEmail: serviceAccountEmail,
         },
       },
     },
