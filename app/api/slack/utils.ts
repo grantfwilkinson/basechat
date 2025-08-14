@@ -6,7 +6,7 @@ import { generateObject } from "ai";
 import Handlebars from "handlebars";
 import { z } from "zod";
 
-import { getRagieSourcePath } from "@/lib/paths";
+import { getPublicRagieSourcePath } from "@/lib/paths";
 import { ConversationMessageResponse, ReplyContext } from "@/lib/server/conversation-context";
 import * as schema from "@/lib/server/db/schema";
 import {
@@ -158,10 +158,10 @@ export function formatMessageWithSources(
       replyContext.sources.forEach((source, index) => {
         const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
 
-        // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
+        // Use public proxy URL for ragieSourceUrl, direct URL for source_url
         let sourceUrl = source.source_url;
         if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
-          const relativePath = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+          const relativePath = getPublicRagieSourcePath(tenantSlug, source.ragieSourceUrl); // Public access, no auth required
           sourceUrl = `${BASE_URL}${relativePath}`;
         } else if (!sourceUrl) {
           sourceUrl = "#";
@@ -179,10 +179,10 @@ export function formatMessageWithSources(
         if (source) {
           const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
 
-          // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
+          // Use public proxy URL for ragieSourceUrl, direct URL for source_url
           let sourceUrl = source.source_url;
           if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
-            const relativePath = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+            const relativePath = getPublicRagieSourcePath(tenantSlug, source.ragieSourceUrl); // Public access, no auth required
             sourceUrl = `${BASE_URL}${relativePath}`;
           } else if (!sourceUrl) {
             sourceUrl = "#";
