@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  eslint: {
+    // Disable ESLint during builds to avoid native binding issues on Vercel
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
