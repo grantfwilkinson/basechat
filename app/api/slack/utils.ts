@@ -99,17 +99,61 @@ export async function isAnswered(message: string, reply: string) {
   return object.isAnswered;
 }
 
+/**
+ * Converts markdown formatting to Slack's mrkdwn format
+ */
+export function convertMarkdownToSlack(text: string): string {
+  return (
+    text
+      // Convert **bold** to *bold*
+      .replace(/\*\*(.*?)\*\*/g, "*$1*")
+      // Convert __bold__ to *bold*
+      .replace(/__(.*?)__/g, "*$1*")
+      // Strikethrough: ~~text~~ to ~text~
+      .replace(/~~(.*?)~~/g, "~$1~")
+  );
+  // Keep _italic_ as is (Slack uses this too)
+  // Keep `code` as is (Slack uses this too)
+  // Keep code blocks as is for now
+}
+
 export function formatMessageWithSources(object: ConversationMessageResponse, replyContext: ReplyContext): string {
-  let messageText = object.message;
+  // Convert markdown formatting to Slack's mrkdwn format
+  let messageText = convertMarkdownToSlack(object.message);
+
+  console.log("Formatting message with sources:", {
+    usedSourceIndexes: object.usedSourceIndexes,
+    sourcesLength: replyContext.sources?.length || 0,
+    sources: replyContext.sources?.slice(0, 3), // Log first 3 sources for debugging
+  });
 
   if (object.usedSourceIndexes && object.usedSourceIndexes.length > 0) {
-    messageText += "\n\n📚 *Sources:*";
+    messageText += "\n\n:books: *Sources:*";
+    let sourcesAdded = 0;
+
     object.usedSourceIndexes.forEach((index) => {
       const source = replyContext.sources[index];
       if (source) {
-        messageText += `\n• <${source.source_url}|${source.documentName}>`;
+        // Ensure we have a document name, fallback to a generic name if missing
+        const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
+        const sourceUrl = source.source_url || source.ragieSourceUrl || "#";
+
+        messageText += `\n• <${sourceUrl}|${documentName}>`;
+        sourcesAdded++;
+
+        console.log(`Added source ${index}:`, { documentName, sourceUrl });
+      } else {
+        console.warn(`Source at index ${index} not found in sources array`);
       }
     });
+
+    if (sourcesAdded === 0) {
+      messageText += "\n• _No sources available_";
+      console.warn("No sources were added despite having usedSourceIndexes");
+    }
+  } else {
+    console.log("No used source indexes found");
   }
+
   return messageText;
 }

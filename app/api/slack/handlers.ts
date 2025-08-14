@@ -132,6 +132,7 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
           channel: event.channel,
           thread_ts: event.ts,
           text,
+          mrkdwn: true,
         });
       } else {
         console.log(`Reply was not an adequate response because it did not give an insightful answer, skipping`);

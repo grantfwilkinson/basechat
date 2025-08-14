@@ -13,7 +13,7 @@ import {
   cleanupTestUser,
 } from "@/lib/test";
 
-import { slackSignIn, SlackSignInOptions } from "./utils";
+import { slackSignIn, SlackSignInOptions, convertMarkdownToSlack } from "./utils";
 
 let db: NodePgDatabase<typeof schema>;
 
@@ -128,5 +128,43 @@ describe("slackSignIn", () => {
         });
       });
     });
+  });
+});
+
+describe("convertMarkdownToSlack", () => {
+  it("should convert **bold** to *bold*", () => {
+    const input = "This is **bold text** and **another bold**.";
+    const expected = "This is *bold text* and *another bold*.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
+  });
+
+  it("should convert __bold__ to *bold*", () => {
+    const input = "This is __bold text__ and __another bold__.";
+    const expected = "This is *bold text* and *another bold*.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
+  });
+
+  it("should convert ~~strikethrough~~ to ~strikethrough~", () => {
+    const input = "This is ~~strikethrough~~ text.";
+    const expected = "This is ~strikethrough~ text.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
+  });
+
+  it("should keep _italic_ unchanged", () => {
+    const input = "This is _italic_ text.";
+    const expected = "This is _italic_ text.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
+  });
+
+  it("should keep `code` unchanged", () => {
+    const input = "This is `code` text.";
+    const expected = "This is `code` text.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
+  });
+
+  it("should handle complex mixed formatting", () => {
+    const input = "**Sick Days Coverage:** This is __important__ and ~~crossed out~~ with `code`.";
+    const expected = "*Sick Days Coverage:* This is *important* and ~crossed out~ with `code`.";
+    expect(convertMarkdownToSlack(input)).toBe(expected);
   });
 });
