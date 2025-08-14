@@ -11,8 +11,15 @@ import {
   GOOGLE_TASKS_QUEUE,
 } from "./settings";
 
-// Initialize Cloud Tasks client
-const cloudTasksClient = new CloudTasksClient();
+// Initialize Cloud Tasks client with explicit configuration
+// This helps with Vercel deployment where environment variables might need explicit handling
+const cloudTasksClient = new CloudTasksClient({
+  projectId: GOOGLE_PROJECT_ID,
+  // Use service account credentials from environment variable if available
+  credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+    : undefined,
+});
 
 interface SlackEventTask {
   event: SlackEvent;

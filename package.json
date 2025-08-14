@@ -10,6 +10,8 @@
     "lint": "next lint",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
+    "db:studio": "npx drizzle-kit studio",
+    "db:push": "npx drizzle-kit push",
     "prepare": "husky",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "update-api-key": "node scripts/update-api-key.js",
