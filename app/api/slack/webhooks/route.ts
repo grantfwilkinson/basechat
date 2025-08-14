@@ -1,4 +1,4 @@
-import { SlackEvent } from "@slack/types";
+import { SlackEvent } from "@slack/web-api";
 import { NextRequest, NextResponse } from "next/server";
 
 import { enqueueSlackEventTask } from "@/lib/server/cloud-tasks";

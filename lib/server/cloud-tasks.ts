@@ -1,6 +1,6 @@
 import assert from "assert";
 
-import { SlackEvent } from "@slack/types";
+import { SlackEvent } from "@slack/web-api";
 import { GoogleAuth } from "google-auth-library";
 
 import {
