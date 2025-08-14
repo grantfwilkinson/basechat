@@ -126,7 +126,7 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
     if (object.usedSourceIndexes.length > 0) {
       const answered = await isAnswered(userMessage ?? "", object.message);
       if (answered) {
-        const text = formatMessageWithSources(object, replyContext);
+        const text = formatMessageWithSources(object, replyContext, tenant.slug);
 
         await slack.chat.postMessage({
           channel: event.channel,

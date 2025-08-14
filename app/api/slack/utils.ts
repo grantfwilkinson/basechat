@@ -6,6 +6,7 @@ import { generateObject } from "ai";
 import Handlebars from "handlebars";
 import { z } from "zod";
 
+import { getRagieSourcePath } from "@/lib/paths";
 import { ConversationMessageResponse, ReplyContext } from "@/lib/server/conversation-context";
 import * as schema from "@/lib/server/db/schema";
 import {
@@ -117,7 +118,11 @@ export function convertMarkdownToSlack(text: string): string {
   // Keep code blocks as is for now
 }
 
-export function formatMessageWithSources(object: ConversationMessageResponse, replyContext: ReplyContext): string {
+export function formatMessageWithSources(
+  object: ConversationMessageResponse,
+  replyContext: ReplyContext,
+  tenantSlug?: string,
+): string {
   // Convert markdown formatting to Slack's mrkdwn format
   let messageText = convertMarkdownToSlack(object.message);
 
@@ -151,7 +156,14 @@ export function formatMessageWithSources(object: ConversationMessageResponse, re
       // Fallback: show all available sources since the AI referenced content from them
       replyContext.sources.forEach((source, index) => {
         const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
-        const sourceUrl = source.source_url || source.ragieSourceUrl || "#";
+
+        // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
+        let sourceUrl = source.source_url;
+        if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
+          sourceUrl = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+        } else if (!sourceUrl) {
+          sourceUrl = "#";
+        }
 
         messageText += `\n• <${sourceUrl}|${documentName}>`;
         sourcesAdded++;
@@ -164,7 +176,14 @@ export function formatMessageWithSources(object: ConversationMessageResponse, re
         const source = replyContext.sources[index];
         if (source) {
           const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
-          const sourceUrl = source.source_url || source.ragieSourceUrl || "#";
+
+          // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
+          let sourceUrl = source.source_url;
+          if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
+            sourceUrl = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+          } else if (!sourceUrl) {
+            sourceUrl = "#";
+          }
 
           messageText += `\n• <${sourceUrl}|${documentName}>`;
           sourcesAdded++;
