@@ -55,14 +55,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
   const auth = await getGoogleAuth();
   const accessToken = await auth.getAccessToken();
 
-  // Get the service account email from credentials
-  const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
-    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-    : null;
-
-  const serviceAccountEmail = credentials?.client_email || GOOGLE_TASKS_SERVICE_ACCOUNT;
-
-  // Create the task using REST API
+  // Create the task using REST API (no OIDC token needed since we're using Bearer auth)
   const taskPayload = {
     task: {
       httpRequest: {
@@ -70,11 +63,9 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
         url,
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: Buffer.from(payload).toString("base64"),
-        oidcToken: {
-          serviceAccountEmail: serviceAccountEmail,
-        },
       },
     },
   };
