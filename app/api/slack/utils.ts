@@ -16,6 +16,7 @@ import {
   findUserBySlackUserId,
   getTenantBySlackTeamId,
 } from "@/lib/server/service";
+import { BASE_URL } from "@/lib/server/settings";
 
 export function createSlackClient(tenant: typeof schema.tenants.$inferSelect) {
   assert(tenant.slackBotToken, "Slack bot token is required");
@@ -160,7 +161,8 @@ export function formatMessageWithSources(
         // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
         let sourceUrl = source.source_url;
         if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
-          sourceUrl = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+          const relativePath = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+          sourceUrl = `${BASE_URL}${relativePath}`;
         } else if (!sourceUrl) {
           sourceUrl = "#";
         }
@@ -180,7 +182,8 @@ export function formatMessageWithSources(
           // Use authenticated proxy URL for ragieSourceUrl, direct URL for source_url
           let sourceUrl = source.source_url;
           if (!sourceUrl && source.ragieSourceUrl && tenantSlug) {
-            sourceUrl = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+            const relativePath = getRagieSourcePath(tenantSlug, source.ragieSourceUrl, source.startPage);
+            sourceUrl = `${BASE_URL}${relativePath}`;
           } else if (!sourceUrl) {
             sourceUrl = "#";
           }
