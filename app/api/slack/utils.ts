@@ -127,32 +127,59 @@ export function formatMessageWithSources(object: ConversationMessageResponse, re
     sources: replyContext.sources?.slice(0, 3), // Log first 3 sources for debugging
   });
 
-  if (object.usedSourceIndexes && object.usedSourceIndexes.length > 0) {
+  if (
+    object.usedSourceIndexes &&
+    object.usedSourceIndexes.length > 0 &&
+    replyContext.sources &&
+    replyContext.sources.length > 0
+  ) {
     messageText += "\n\n:books: *Sources:*";
     let sourcesAdded = 0;
 
-    object.usedSourceIndexes.forEach((index) => {
-      const source = replyContext.sources[index];
-      if (source) {
-        // Ensure we have a document name, fallback to a generic name if missing
+    // Check if any of the usedSourceIndexes are out of bounds
+    const validIndexes = object.usedSourceIndexes.filter((index) => index < replyContext.sources.length);
+    const hasInvalidIndexes = validIndexes.length !== object.usedSourceIndexes.length;
+
+    if (hasInvalidIndexes) {
+      console.warn(
+        "Some source indexes are out of bounds. This indicates a mismatch between AI response and deduplicated sources.",
+      );
+      console.warn(
+        `AI referenced indexes: [${object.usedSourceIndexes.join(", ")}], but sources array only has ${replyContext.sources.length} items`,
+      );
+
+      // Fallback: show all available sources since the AI referenced content from them
+      replyContext.sources.forEach((source, index) => {
         const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
         const sourceUrl = source.source_url || source.ragieSourceUrl || "#";
 
         messageText += `\n• <${sourceUrl}|${documentName}>`;
         sourcesAdded++;
 
-        console.log(`Added source ${index}:`, { documentName, sourceUrl });
-      } else {
-        console.warn(`Source at index ${index} not found in sources array`);
-      }
-    });
+        console.log(`Added fallback source ${index}:`, { documentName, sourceUrl });
+      });
+    } else {
+      // Normal case: use the specific indexes
+      validIndexes.forEach((index) => {
+        const source = replyContext.sources[index];
+        if (source) {
+          const documentName = source.documentName || source.source_url?.split("/").pop() || "Document";
+          const sourceUrl = source.source_url || source.ragieSourceUrl || "#";
+
+          messageText += `\n• <${sourceUrl}|${documentName}>`;
+          sourcesAdded++;
+
+          console.log(`Added source ${index}:`, { documentName, sourceUrl });
+        }
+      });
+    }
 
     if (sourcesAdded === 0) {
       messageText += "\n• _No sources available_";
       console.warn("No sources were added despite having usedSourceIndexes");
     }
   } else {
-    console.log("No used source indexes found");
+    console.log("No used source indexes found or no sources available");
   }
 
   return messageText;
