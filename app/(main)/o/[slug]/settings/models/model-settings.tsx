@@ -180,7 +180,7 @@ const SearchSettingsField = (form: UseFormReturn<FormValues>) => {
                       <RadioGroupItem
                         value="breadth"
                         id="breadth"
-                        className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                        className="text-[#364239] border-[#D7D7D7] data-[state=checked]:bg-[#364239]"
                       />
                       <label htmlFor="breadth" className="text-sm">
                         Breadth Mode
@@ -195,7 +195,7 @@ const SearchSettingsField = (form: UseFormReturn<FormValues>) => {
                       <RadioGroupItem
                         value="depth"
                         id="depth"
-                        className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                        className="text-[#364239] border-[#D7D7D7] data-[state=checked]:bg-[#364239]"
                       />
                       <label htmlFor="depth" className="text-sm">
                         Depth Mode
@@ -244,7 +244,7 @@ const SearchSettingsField = (form: UseFormReturn<FormValues>) => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-[#D946EF]"
+                    className="data-[state=checked]:bg-[#364239]"
                   />
                 </FormControl>
               </div>
@@ -286,7 +286,7 @@ const SearchSettingsField = (form: UseFormReturn<FormValues>) => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-[#D946EF]"
+                    className="data-[state=checked]:bg-[#364239]"
                   />
                 </FormControl>
               </div>
@@ -412,7 +412,7 @@ export default function ModelSettings({ tenant }: Props) {
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[#D946EF] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
+            className="rounded-lg bg-[#364239] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
             disabled={!form.formState.isDirty || isLoading}
             onClick={() => onSubmit(form.getValues())}
           >

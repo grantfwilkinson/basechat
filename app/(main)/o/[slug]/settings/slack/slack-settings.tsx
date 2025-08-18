@@ -181,11 +181,7 @@ export default function SlackSettings({ tenant, slackConfigured }: Props) {
     <div className="w-full p-4 flex-grow flex flex-col relative">
       <div className="flex w-full justify-between items-center mb-12">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-bold text-[32px] text-[#343A40]">Slack Integration</h1>
-            <span className="bg-[#D946EF] text-white rounded-lg px-3 py-1 text-sm font-semibold">Early Access</span>
-          </div>
-          <p className="text-base text-muted-foreground mt-2">Free to try during Early Access</p>
+          <h1 className="font-bold text-[32px] text-[#343A40]">Slack Integration</h1>
         </div>
       </div>
 

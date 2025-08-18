@@ -71,7 +71,7 @@ const TextAreaField = ({ form, name, label, className, help, hasDefault, descrip
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-sm text-[#D946EF] hover:text-foreground transition-colors"
+                className="text-sm text-[#364239] hover:text-foreground transition-colors"
               >
                 Reset
               </button>
@@ -166,7 +166,7 @@ export default function PromptSettings({ tenant }: Props) {
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[#D946EF] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
+            className="rounded-lg bg-[#364239] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
             disabled={!form.formState.isDirty || isLoading}
             onClick={form.handleSubmit(onSubmit)}
           >

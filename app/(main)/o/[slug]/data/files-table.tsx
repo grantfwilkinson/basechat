@@ -2,14 +2,13 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Dropzone from "react-dropzone";
 import { toast } from "sonner";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import CONNECTOR_MAP from "@/lib/connector-map";
+// Connection column removed
 import { MAX_FILE_SIZE, getDropzoneAcceptConfig, uploadFile, validateFile } from "@/lib/file-utils";
 import { getStatusDisplayName } from "@/lib/utils";
 
@@ -266,7 +265,6 @@ export default function FilesTable({
                 <TableHeader>
                   <TableRow noHover>
                     <TableHead className="w-[600px] pl-0">Name</TableHead>
-                    <TableHead className="w-[200px]">Connection</TableHead>
                     <TableHead className="w-[200px]">Added by</TableHead>
                     <TableHead className="w-[200px]">Date added</TableHead>
                     <TableHead className="w-[200px]">Date modified</TableHead>
@@ -277,22 +275,7 @@ export default function FilesTable({
                   {allFiles.map((file) => (
                     <TableRow key={file.id} noHover>
                       <TableCell className="font-medium">{file.name}</TableCell>
-                      <TableCell>
-                        {file.metadata?.source_type &&
-                        file.metadata.source_type !== "manual" &&
-                        CONNECTOR_MAP[file.metadata.source_type] ? (
-                          <div className="flex items-center gap-2">
-                            <Image
-                              src={CONNECTOR_MAP[file.metadata.source_type][1]}
-                              alt={CONNECTOR_MAP[file.metadata.source_type][0]}
-                              className="mr-1"
-                            />
-                            {CONNECTOR_MAP[file.metadata.source_type][0]}
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
+
                       <TableCell>
                         {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
                           <div>{connectionMap[file.metadata.source_type]?.addedBy || "-"}</div>

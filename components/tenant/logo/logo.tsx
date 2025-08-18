@@ -18,6 +18,20 @@ export default function Logo({ name, url, width, height, className, initialCount
   const avatarClass = tenantId ? `avatar-${getAvatarNumber(tenantId)}` : "";
 
   if (!url) {
+    if (tenantId) {
+      // Default to New Engen logo when rendering a tenant without a custom logo
+       
+      return (
+        <img
+          src="/images/Group 366.png"
+          alt={formattedName || "Logo"}
+          className={cn("rounded-full object-cover", className)}
+          height={height}
+          width={width}
+        />
+      );
+    }
+
     return (
       <div
         className={cn(

@@ -377,7 +377,7 @@ export default function UserSettings({
                           <FormControl>
                             <textarea
                               placeholder="Email addresses, comma separated"
-                              className="w-full rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-3 py-2 shadow-none min-h-[80px] max-h-[200px] resize-none overflow-y-auto"
+                              className="w-full rounded-lg border border-[#364239] bg-[#F5F5F7] px-3 py-2 shadow-none min-h-[80px] max-h-[200px] resize-none overflow-y-auto"
                               onChange={(e) => handleEmailsChange(e.target.value)}
                             />
                           </FormControl>
@@ -392,7 +392,7 @@ export default function UserSettings({
                           <FormLabel>Role</FormLabel>
                           <FormMessage>Must select a role</FormMessage>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="focus:ring-[#D946EF]">
+                            <FormControl className="focus:ring-[#364239]">
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a role" />
                               </SelectTrigger>

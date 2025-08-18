@@ -43,7 +43,7 @@ export function PaymentRequiredDialog({ tenant, profile }: PaymentRequiredDialog
             continue using Base Chat. It&apos;s just $18 per user/month, plus a data plan.
           </p>
           <Link href={getPricingPlansPath(tenant.slug)}>
-            <Button className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 w-fit">View plans</Button>
+            <Button className="bg-[#364239] text-white hover:bg-[#364239]/90 w-fit">View plans</Button>
           </Link>
         </div>
       </DialogContent>

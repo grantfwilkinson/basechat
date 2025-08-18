@@ -1,6 +1,6 @@
 import assert from "assert";
 
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
@@ -11,7 +11,6 @@ import { DEFAULT_NAMING_MODEL } from "@/lib/llm/types";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { requireAuthContextFromRequest } from "@/lib/server/utils";
-
 
 const createConversationRequest = z.object({
   content: z.string(),
@@ -94,7 +93,7 @@ params: content: string
 returns: string - appropriate name for this conversation
 */
 async function createConversationTitle(content: string) {
-  const model = openai(DEFAULT_NAMING_MODEL);
+  const model = anthropic(DEFAULT_NAMING_MODEL);
   const systemPrompt = NAMING_SYSTEM_PROMPT;
   const userPrompt = `
   Here is the initial message from the user:

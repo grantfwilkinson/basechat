@@ -3,7 +3,7 @@ import { z } from "zod";
 // Single source of truth for providers and their models
 export const PROVIDER_CONFIG = {
   openai: {
-    models: ["gpt-4o", "gpt-3.5-turbo", "gpt-4.1-2025-04-14", "o3-2025-04-16"] as const,
+    models: [] as const,
     logo: "/openai.svg",
     modelLogos: {
       "gpt-4o": "/openai.svg",
@@ -19,7 +19,7 @@ export const PROVIDER_CONFIG = {
     } as const,
   },
   google: {
-    models: ["gemini-2.0-flash", "gemini-1.5-pro"] as const,
+    models: [] as const,
     logo: "/gemini.svg",
     modelLogos: {
       "gemini-2.0-flash": "/gemini.svg",
@@ -31,12 +31,7 @@ export const PROVIDER_CONFIG = {
     } as const,
   },
   anthropic: {
-    models: [
-      "claude-3-7-sonnet-latest",
-      "claude-3-5-haiku-latest",
-      "claude-opus-4-20250514",
-      "claude-sonnet-4-20250514",
-    ] as const,
+    models: ["claude-sonnet-4-20250514"] as const,
     logo: "/anthropic.svg",
     modelLogos: {
       "claude-3-7-sonnet-latest": "/anthropic.svg",
@@ -52,12 +47,7 @@ export const PROVIDER_CONFIG = {
     } as const,
   },
   groq: {
-    models: [
-      "meta-llama/llama-4-scout-17b-16e-instruct",
-      "openai/gpt-oss-20b",
-      "openai/gpt-oss-120b",
-      "moonshotai/kimi-k2-instruct",
-    ] as const,
+    models: [] as const,
     logo: "/meta.svg",
     modelLogos: {
       "meta-llama/llama-4-scout-17b-16e-instruct": "/meta.svg",
@@ -93,7 +83,7 @@ Do not include any other fields or text outside the JSON object.`;
 // If changing the DEFAULT_NAMING_MODEL, update createConversationName in app/api/conversations/[conversationId]/messages/utils.ts to use appropriate provider
 export const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 export const DEFAULT_PROVIDER = "anthropic";
-export const DEFAULT_NAMING_MODEL = "gpt-4o-mini";
+export const DEFAULT_NAMING_MODEL = "claude-sonnet-4-20250514";
 
 // Derive types from the config
 export type LLMProvider = keyof typeof PROVIDER_CONFIG;

@@ -17,7 +17,7 @@ export function Button({
 }) {
   return (
     <button
-      className={cn("text-md text-white text-[16px] font-semibold bg-[#D946EF] rounded-[54px] py-2 w-full", className)}
+      className={cn("text-md text-white text-[16px] font-semibold bg-[#364239] rounded-[54px] py-2 w-full", className)}
       disabled={disabled}
     >
       {children}

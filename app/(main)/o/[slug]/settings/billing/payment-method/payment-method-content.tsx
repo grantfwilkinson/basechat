@@ -107,7 +107,7 @@ export default function PaymentMethodContent({
               <h2 className="text-[#74747A] font-semibold">Active payment method</h2>
               <Button
                 variant="link"
-                className="text-[#D946EF] hover:text-foreground"
+                className="text-[#364239] hover:text-foreground"
                 onClick={() => setState(DisplayState.AddingPaymentMethod)}
               >
                 Add credit card

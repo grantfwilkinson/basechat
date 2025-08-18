@@ -119,7 +119,7 @@ const TextAreaField = ({ form, name, label, className, help, hasDefault }: TextA
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-sm text-[#D946EF] hover:text-foreground transition-colors"
+                className="text-sm text-[#364239] hover:text-foreground transition-colors"
               >
                 Reset
               </button>
@@ -151,14 +151,9 @@ const CompanyNameField = ({ form, name, label }: CompanyNameFieldProps) => {
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel className="font-semibold text-base mb-3">{label}</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              className="rounded-[8px] border border-[#D7D7D7] h-[58px] placeholder-[#74747A] text-base"
-              {...field}
-              value={String(field.value)}
-            />
-          </FormControl>
+          <div className="rounded-[8px] border border-[#D7D7D7] h-[58px] text-base flex items-center px-3 bg-[#F5F5F7]">
+            {String(field.value)}
+          </div>
           <FormMessage />
         </FormItem>
       )}
@@ -194,15 +189,9 @@ const URLField = ({ form, name, label }: URLFieldProps) => {
       render={({ field }) => (
         <FormItem className="flex flex-col mt-8">
           <FormLabel className="font-semibold text-base mb-3">{label}</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              placeholder="Enter URL"
-              className="rounded-[8px] border border-[#D7D7D7] h-[58px] placeholder-[#74747A] text-base"
-              {...field}
-              value={String(field.value)}
-            />
-          </FormControl>
+          <div className="rounded-[8px] border border-[#D7D7D7] h-[58px] text-base flex items-center px-3 bg-[#F5F5F7]">
+            {String(field.value)}
+          </div>
           <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
             <span>
               Your chat will be available at: {origin}/o/{field.value || "your-chat-name"}
@@ -223,35 +212,7 @@ const URLField = ({ form, name, label }: URLFieldProps) => {
   );
 };
 
-type PublicSwitchFieldProps = {
-  name: keyof FormValues;
-  label: string;
-  form: UseFormReturn<FormValues>;
-};
-
-const PublicSwitchField = ({ form, name, label }: PublicSwitchFieldProps) => (
-  <FormField
-    control={form.control}
-    name={name}
-    render={({ field }) => (
-      <FormItem className="flex flex-row items-center justify-between mt-8">
-        <div className="space-y-0.5">
-          <FormLabel className="font-semibold text-base">{label}</FormLabel>
-          <p className="text-sm text-muted-foreground">Anyone with the link can chat with your AI assistant</p>
-        </div>
-        <div className="flex-shrink-0 ml-4">
-          <FormControl>
-            <Switch
-              checked={Boolean(field.value)}
-              onCheckedChange={field.onChange}
-              className="data-[state=checked]:bg-[#D946EF]"
-            />
-          </FormControl>
-        </div>
-      </FormItem>
-    )}
-  />
-);
+// Public chat toggle removed
 
 type Props = {
   tenant: typeof schema.tenants.$inferSelect;
@@ -357,7 +318,7 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[#D946EF] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
+            className="rounded-lg bg-[#364239] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
             disabled={!form.formState.isDirty || isLoading}
             onClick={form.handleSubmit(onSubmit)}
           >
@@ -391,7 +352,7 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
 
             <hr className="w-full my-8" />
 
-            <h3 className="font-semibold text-base text-[#343A40]">Example questions to help your users get started</h3>
+            <h3 className="font-semibold text-base text-[#343A40]">Prompt questions</h3>
 
             <QuestionField form={form} name="question1" label="Question 1" />
             <QuestionField form={form} name="question2" label="Question 2" />
@@ -400,8 +361,6 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
             <hr className="w-full my-8" />
 
             <URLField form={form} name="slug" label="URL name" />
-            <hr className="w-full my-8" />
-            <PublicSwitchField form={form} name="isPublic" label="Enable public chat" />
             <hr className="w-full my-8" />
           </div>
         </form>
