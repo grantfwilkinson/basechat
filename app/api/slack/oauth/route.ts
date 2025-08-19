@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
     "reactions:read",
     "reactions:write",
     "users:read",
+    "assistant:write",
+    "im:history",
   ].join(",");
 
   const authUrl = new URL("https://slack.com/oauth/v2/authorize");
