@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { getSlackSettingsPath } from "@/lib/paths";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
+import { findTenantBySlug, invalidateAuthContextCacheForTenant } from "@/lib/server/service";
 import { SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, BASE_URL } from "@/lib/server/settings";
 
 export async function GET(request: NextRequest) {
@@ -55,6 +56,15 @@ export async function GET(request: NextRequest) {
         slackTeamName: tokenData.team?.name,
       })
       .where(eq(schema.tenants.slug, state));
+
+    try {
+      const tenant = await findTenantBySlug(state);
+      if (tenant) {
+        await invalidateAuthContextCacheForTenant(tenant.id);
+      }
+    } catch (e) {
+      console.warn("Failed to invalidate auth context cache after Slack connect:", e);
+    }
 
     // Redirect back to Slack settings with success
     return Response.redirect(`${BASE_URL}${getSlackSettingsPath(state)}?success=true`);
